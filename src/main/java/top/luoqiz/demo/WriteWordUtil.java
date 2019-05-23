@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -21,7 +22,10 @@ import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
 import com.deepoove.poi.XWPFTemplate;
-import com.deepoove.poi.data.PictureRenderData;
+import com.deepoove.poi.data.HyperLinkTextRenderData;
+import com.deepoove.poi.data.MiniTableRenderData;
+import com.deepoove.poi.data.RowRenderData;
+import com.deepoove.poi.data.TextRenderData;
 
 /**
  * @author Admin
@@ -212,32 +216,37 @@ public class WriteWordUtil {
 		return "";
 	}
 
-	public static void main(String[] args) throws Exception {
-//		Map<String, Object> params = new HashMap<String, Object>();
-//		params.put("JSDWMC", "项目1\r\na");//  
-//		params.put("XMMC", "项目2\r\nb");//  
-//		params.put("1", "1");//
-//		params.put("2", "2");//
-//		params.put("object1", "o1");//  
-//		params.put("object2", "o2");//
-//			params.put("localPicture", new PictureRenderData(120, 120, "D:\\test\\watermark.png"));
-////		templateWrite("D:\\test\\1.docx", params, "D:\\test\\5.docx");
-//		templateWrite2("D:\\test\\1.docx", params, "D:\\test\\7.docx");
-// 
-		XWPFTemplate template = XWPFTemplate.compile("D:\\test\\1.docx").render(new HashMap<String, Object>() {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			{
-				put("XMMC", "Poi-tl 模板引擎99999999999999999999999999999999999999999");
-			}
-		});
-		FileOutputStream out = new FileOutputStream("D:\\test\\8.docx");
+	public static String templateWrite3(String filePath, Entity entity, String outFilePath) throws Exception {
+		XWPFTemplate template = XWPFTemplate.compile(filePath).render(entity);
+		FileOutputStream out = new FileOutputStream(outFilePath);
 		template.write(out);
 		out.flush();
 		out.close();
 		template.close();
+		return "";
+	}
+
+	public static void main(String[] args) throws Exception {
+		//第一种
+		HashMap<String, Object> param = new HashMap<String, Object>();
+		param.put("XMMC", "Poi-tl 模板引擎99999999999999999999999999999999999999999");
+		param.put("link", new HyperLinkTextRenderData("website.", "http://www.deepoove.com"));
+		templateWrite2("D:\\test\\1.docx",param,"D:\\test\\8.docx");
+
+		//第二种
+		Entity entity = new Entity();
+		entity.setDesc("王章");
+		entity.setUrl(new HyperLinkTextRenderData("website.", "http://www.deepoove.com"));
+		
+		//第三种
+		RowRenderData header = RowRenderData.build(new TextRenderData("FFFF00", "姓名"),
+				new TextRenderData("FFFF00", "学历"));
+
+		RowRenderData row1 = RowRenderData.build("李四", "博士");
+		RowRenderData row2 = RowRenderData.build(new HyperLinkTextRenderData("王五", "http://www.deepoove.com"),
+				new HyperLinkTextRenderData("博士后", "http://www.deepoove.com"));
+
+		entity.setTable(new MiniTableRenderData(header, Arrays.asList( row1, row2)));
+		templateWrite3("D:\\test\\1.docx", entity, "D:\\test\\9.docx");
 	}
 }
